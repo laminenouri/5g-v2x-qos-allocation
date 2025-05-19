@@ -149,10 +149,6 @@ During each simulation run, the following performance metrics are computed and r
 
 ## 🧾 References
 
-- `Analyse_Discussion.docx`: reliability analysis insights
-- `Compte_Rendu_Reunion_2025-05-14.pdf`: meeting expectations
-- `New_IEEEtran_how-to.pdf`: IEEE article formatting
-
 ---
 
 ## 👤 Author
