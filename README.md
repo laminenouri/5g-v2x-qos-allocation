@@ -1,4 +1,3 @@
-```markdown
 # 5g-v2x-qos-allocation
 
 ## 🎯 Project Overview
@@ -70,7 +69,5 @@ simulate_temps_poisson(
 Master's Thesis – Research Internship
 ECE Paris, LYRIDS Research Lab
 Supervised by Dr. Naila Bouchemal
-
-```
 
 
