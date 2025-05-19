@@ -66,7 +66,7 @@ simulate_temps_poisson(
 ## 👤 Author
 
 **Lamine Nouri**
-Master's Thesis – Research Internship
+Research Internship
 ECE Paris, LYRIDS Research Lab
 Supervised by Dr. Naila Bouchemal
 
