@@ -146,6 +146,63 @@ During each simulation run, the following performance metrics are computed and r
 - System must have \( \rho < 1 \) to be stable
 
 ---
+## 🧮 Analytical Model — `Analytique_calcul_esperance.py`
+
+This script implements the analytical model from the 2025 paper, using **Markov chain analysis** and queueing theory to estimate key performance metrics under priority-based scheduling.
+
+It models the **class 2 (URLLC)** queue, assuming:
+- Compound Poisson arrivals
+- Deterministic service
+- Shared system capacity C (with strict priority)
+
+### 🧠 What It Does
+
+- Computes the **stationary distribution π(k)** (probability of k class 2 clients in system)
+- From this, it derives:
+  - **Expected number of clients** in the system: \( E[Y_2] = \sum_k k \cdot \pi_k \)
+  - **Expected delay**: \( E[S_2] = E[Y_2] / C \)
+  - **Reliability** \( R(D) \): the probability that a class 2 client is served within D ms, via:
+    \[
+    R(D) = \sum_{k=0}^{\lfloor D / T 
+floor} \pi_k
+    \]
+
+### 📊 Result Metrics
+
+| Metric | Description | Why It Matters |
+|--------|-------------|----------------|
+| `E[Y_2]` | Expected number of URLLC clients in the system | Measures system load and queuing tension |
+| `E[S_2]` | Expected delay for a class 2 packet | Must be < latency target (e.g., 1–5 ms for URLLC) |
+| `π(k)`  | Probability of having k clients | Used to predict rare events, overload states |
+| `R(D)`  | Probability that delay ≤ D | Core QoS metric — defines URLLC compliance (e.g., R(1 ms) ≥ 99.999%) |
+
+These metrics allow **offline dimensioning** of a slice:
+- Tune the arrival rate λ₂ and burstiness p₂ to ensure \( R(D) \) is high
+- Identify the **minimum required C** to meet delay requirements
+
+### 🔧 How to Use
+
+```python
+from code.Analytique_calcul_esperance import compute_expectation
+
+# Example parameters (must match simulation)
+lambda_2 = 6.0   # Arrival rate (class 2)
+m2 = 20          # Max burst size
+p2 = 0.4         # Burst probability
+C = 500          # System capacity
+
+EY2 = compute_expectation(lambda_2, m2, p2, C)
+print("E[Y2] =", EY2)
+print("Expected delay S2 =", EY2 / C)
+```
+
+To compute reliability with a delay threshold D:
+- Use π(k) in the notebook `urlcc_delay_reliability_analysis.ipynb`
+- Calculate:
+  \[
+  R(D) = \sum_{k=0}^{\lfloor D / T 
+floor} \pi_k
+  \]
 
 ## 🧾 References
 
