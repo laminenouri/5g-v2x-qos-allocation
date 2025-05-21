@@ -289,7 +289,7 @@ def courbe_temps_attente_dom(N,nbre_pts=30,pas=0.01,alpha=0.5):
     list_esperance_Cl2_anal=[]
     #list_A1=[]
     #list_A2=[]
-    T=0.01
+    T=0.001
     m1=48
     m2=20
     p1=0.6
@@ -312,21 +312,6 @@ def courbe_temps_attente_dom(N,nbre_pts=30,pas=0.01,alpha=0.5):
         #print(dic_frequency)
         #Mariem :index, proba pour calculer Y_init
         L_temps_1, L_temps_2, pop_1, pop_2, dic, dic_frequency2,dic_del_2,dic_att_2,dic_del_par_RB_2,dic_del_1,dic_att_1,dic_del_par_RB_1=simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2)
-        // ...existing code...
-        dcprob = pd.DataFrame(data=cprob)  
-        with pd.ExcelWriter('dict_compose_poisson_Cl2_proba%d.xlsx'% (prec), engine="openpyxl", mode='w+') as writer:
-           dcprob.to_excel(writer)
-        cprob1={'lamda_1':lam_1,
-           'lamda_2':lam_2,
-           'dic_nbre_clients_poisson_1_keys': dic_out_poisson_1.keys(),
-           'dic_nbre_clients_prob_poisson_1_values': dic_out_poisson_1.values(),}
-           //'temps_attente_classe_2':L_temps_2}
-          // 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
-          // 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
-        dcprob1 = pd.DataFrame(data=cprob1)  
-        with pd.ExcelWriter('dict_compose_poisson_Cl1_proba%d.xlsx'% (prec), engine="openpyxl", mode='w+') as writer:
-           dcprob1.to_excel(writer)
-        // ...existing code...
         #Mariem : ind,prob pour calculer l'éspérance
         #for m in dic_del_2.keys():
         for d in dic_del_2.keys():
@@ -337,11 +322,11 @@ def courbe_temps_attente_dom(N,nbre_pts=30,pas=0.01,alpha=0.5):
         Del_Cl1_freq_poisson=dict(Counter(dic_del_par_RB_1.values()))
         for e in Del_Cl1_freq_poisson.keys():
             Del_Cl1_freq_poisson[e]=Del_Cl1_freq_poisson[e]/N
-            //e=np.rint(e)
-        //return L1
+            #e=np.rint(e)
+        #return L1
         dic_out_poisson_1=function_cl1(dic_frequency2)
         dic_out_poisson_2=function_cl2(dic_frequency2)
-        ind,prob=np.array(list(dic.keys())),((1/N)*np.array(list(dic.values()))) //formatage(M)
+        ind,prob=np.array(list(dic.keys())),((1/N)*np.array(list(dic.values()))) #formatage(M)
         esp=cal_esperance(ind,prob)
         list_esp1_pois.append(esp[0])
         list_esp2_pois.append(esp[1])
@@ -354,96 +339,85 @@ def courbe_temps_attente_dom(N,nbre_pts=30,pas=0.01,alpha=0.5):
         list_dom.append(m1*p1*lam_1/(m2*p2*lam_2))
         list_esperance_Cl1_anal.append(m1*p1*T*lam_1)
         list_esperance_Cl2_anal.append(m2*p2*T*lam_2)
-        //poisson
+        #poisson
         cfreq={'lamda_1':lam_1,
            'lamda_2':lam_2,
            'dic_frequency_poisson_2_keys': dic_frequency2.keys(),
            'dic_frequency_poisson_2_values': dic_frequency2.values(),}
-           //'temps_attente_classe_2':L_temps_2}
-          // 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
-          // 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
-        dcfreq = pd.DataFrame(data=cfreq) 
-        with pd.ExcelWriter('dict_compose_poisson_freq%d.xlsx'% (prec), engine="openpyxl",mode='w') as writer:
-           dcfreq.to_excel(writer,sheet_name='dict_compose_poisson_freq')  
+           #'temps_attente_classe_2':L_temps_2}
+          # 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
+          # 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
+        dcfreq = pd.DataFrame(data=cfreq)  
+        with pd.ExcelWriter('dict_compose_poisson_freq%d.xlsx'% (prec), engine="openpyxl",mode='w+') as writer:
+           dcfreq.to_excel(writer)  
         cprob={'lamda_1':lam_1,
            'lamda_2':lam_2,
            'dic_nbre_clients_poisson_2_keys': dic_out_poisson_2.keys(),
            'dic_nbre_clients_prob_poisson_2_values': dic_out_poisson_2.values(),}
-           //'temps_attente_classe_2':L_temps_2}
-          // 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
-          // 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
+           #'temps_attente_classe_2':L_temps_2}
+          # 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
+          # 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
         dcprob = pd.DataFrame(data=cprob)  
-        with pd.ExcelWriter('dict_compose_poisson_Cl2_proba%d.xlsx'% (prec), engine="openpyxl", mode='w+') as writer:
+        with pd.ExcelWriter('dict_compose_poisson_Cl2_proba%d.xlsx'% (prec), engine="openpyxl",mode='w+') as writer:
            dcprob.to_excel(writer)
         cprob1={'lamda_1':lam_1,
            'lamda_2':lam_2,
            'dic_nbre_clients_poisson_1_keys': dic_out_poisson_1.keys(),
            'dic_nbre_clients_prob_poisson_1_values': dic_out_poisson_1.values(),}
-           //'temps_attente_classe_2':L_temps_2}
-          // 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
-          // 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
+           #'temps_attente_classe_2':L_temps_2}
+          # 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
+          # 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
         dcprob1 = pd.DataFrame(data=cprob1)  
-        with pd.ExcelWriter('dict_compose_poisson_Cl1_proba%d.xlsx'% (prec), engine="openpyxl", mode='w+') as writer:
-           dcprob1.to_excel(writer)
-        cprob1={'lamda_1':lam_1,
-           'lamda_2':lam_2,
-           'dic_nbre_clients_poisson_1_keys': dic_out_poisson_1.keys(),
-           'dic_nbre_clients_prob_poisson_1_values': dic_out_poisson_1.values(),}
-           //'temps_attente_classe_2':L_temps_2}
-          // 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
-          // 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
-        dcprob1 = pd.DataFrame(data=cprob1)  
-        with pd.ExcelWriter('dict_compose_poisson_Cl1_proba%d.xlsx'% (prec), engine="openpyxl", mode='A') as writer:
+        with pd.ExcelWriter('dict_compose_poisson_Cl1_proba%d.xlsx'% (prec), engine="openpyxl",mode='w+') as writer:
            dcprob1.to_excel(writer)
         cdel={'lamda_1':lam_1,
               'lamda_2':lam_2,
-              //'dic_frequency_keys': dic_frequency2.keys(),
-              //'dic_frequency_values': dic_frequency2.values(),
+              #'dic_frequency_keys': dic_frequency2.keys(),
+              #'dic_frequency_values': dic_frequency2.values(),
               'nbre_clients_système_poisson':dic_del_2.keys(),
               'delai_classe_2_poisson':dic_del_2.values(),
               'attente_classe2_poisson':dic_att_2.values(),
               'dic_del_par_RB_2_poisson':dic_del_par_RB_2.values(),}
-          // 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
-          // 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
+          # 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
+          # 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
         dcdel = pd.DataFrame(data=cdel)  
-        with pd.ExcelWriter('dict_compose_poisson_Cl2_del%d.xlsx'% (prec), engine="openpyxl",mode='A') as writer:
+        with pd.ExcelWriter('dict_compose_poisson_Cl2_del%d.xlsx'% (prec), engine="openpyxl",mode='w+') as writer:
            dcdel.to_excel(writer)
         cdelf={'lamda_1':lam_1,
               'lamda_2':lam_2,
-              //'dic_frequency_keys': dic_frequency2.keys(),
-              //'dic_frequency_values': dic_frequency2.values(),
+              #'dic_frequency_keys': dic_frequency2.keys(),
+              #'dic_frequency_values': dic_frequency2.values(),
               'delai_classe_2_poisson':Del_freq_poisson.keys(),
               'freq_delai_classe2_poisson':Del_freq_poisson.values(),}
-          // 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
-          // 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
+          # 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
+          # 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
         dcdelf = pd.DataFrame(data=cdelf)  
-        with pd.ExcelWriter('dict_compose_poisson_Cl2_del_freq%d.xlsx'% (prec), engine="openpyxl",mode='A') as writer:
+        with pd.ExcelWriter('dict_compose_poisson_Cl2_del_freq%d.xlsx'% (prec), engine="openpyxl",mode='w+') as writer:
            dcdelf.to_excel(writer)    
         cdelclass1={'lamda_1':lam_1,
               'lamda_2':lam_2,
-              //'dic_frequency_keys': dic_frequency2.keys(),
-              //'dic_frequency_values': dic_frequency2.values(),
+              #'dic_frequency_keys': dic_frequency2.keys(),
+              #'dic_frequency_values': dic_frequency2.values(),
               'nbre_clients_système_poisson':dic_del_2.keys(),
               'delai_classe_1_poisson':dic_del_1.values(),
               'attente_classe1_poisson':dic_att_1.values(),
               'dic_del_par_RB_1_poisson':dic_del_par_RB_1.values(),}
-          // 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
-          // 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
+          # 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
+          # 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
         dcdelcl1 = pd.DataFrame(data=cdelclass1)  
-        with pd.ExcelWriter('dict_compose_poisson_Cl1_del%d.xlsx'% (prec), engine="openpyxl",mode='A') as writer:
+        with pd.ExcelWriter('dict_compose_poisson_Cl1_del%d.xlsx'% (prec), engine="openpyxl",mode='w+') as writer:
            dcdelcl1.to_excel(writer)
         cdelfclass1={'lamda_1':lam_1,
               'lamda_2':lam_2,
-              //'dic_frequency_keys': dic_frequency2.keys(),
-              //'dic_frequency_values': dic_frequency2.values(),
+              #'dic_frequency_keys': dic_frequency2.keys(),
+              #'dic_frequency_values': dic_frequency2.values(),
               'delai_classe_1_poisson':Del_Cl1_freq_poisson.keys(),
               'freq_delai_classe_1_poisson':Del_Cl1_freq_poisson.values(),}
-          // 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
-          // 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
+          # 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
+          # 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
         dcdelf = pd.DataFrame(data=cdelfclass1)  
-        with pd.ExcelWriter('dict_compose_poisson_Cl1_del_freq%d.xlsx'% (prec), engine="openpyxl",mode='A') as writer:
-           dcdelf.to_excel(writer)  
-
+        with pd.ExcelWriter('dict_compose_poisson_Cl1_del_freq%d.xlsx'% (prec), engine="openpyxl",mode='w+') as writer:
+           dcdelf.to_excel(writer)                         
     d = {'rapport_stabilité': list_stab, 
          'tmps-att1-pois': list_tmps_att1_pois, 
          'tmps-att2-pois':list_tmps_att2_pois,
@@ -458,3 +432,15 @@ def courbe_temps_attente_dom(N,nbre_pts=30,pas=0.01,alpha=0.5):
          'm2':[m2]*(nbre_pts-1),
         'p1':[p1]*(nbre_pts-1),
         'p2':[p2]*(nbre_pts-1),
+        'C1':[C1]*(nbre_pts-1),
+         'C2':[C2]*(nbre_pts-1),
+         'C0':[C0]*(nbre_pts-1),        
+        }
+    #c={dic_frequency}
+    df = pd.DataFrame(data=d)  
+    #dc = pd.DataFrame(data=c)  
+    with pd.ExcelWriter('sim_res_new_compose.xlsx', engine="openpyxl",mode='w+') as writer:
+        df.to_excel(writer)
+    #with pd.ExcelWriter('dict.xlsx', engine="openpyxl",mode='A') as writer:
+    #    dc.to_excel(writer)
+    return df
