@@ -72,11 +72,20 @@ def function_cl2(dic):
         G.append(S)
         dic_out[C1[j]]=G[j]
     return dic_out
-def calcul_attente(y):
+"""def calcul_attente(y):
     A=0
     if 450-y<0:
-       A=y-450
+       #A=y-450
+       A=(y-450) * slot_duration_ms
+    return A"""
+
+def calcul_attente(y,C0):
+    A=0
+    if C0-y<0:
+       #A=y-450
+       A=(y-C0) * slot_duration_ms
     return A
+
 def cal_esperance(index,proba):
     B=2000
     moy=np.array([0,0])
@@ -104,6 +113,41 @@ Calcul du nombre de RBs (slots) maximum par message:
 Classe 1: 4000/336= 11,9 => 12RBs
 m2=5 (en RBs) et p2= 0.3 (plus de petits paquets) et m1=12 (en RBs) et p1= 0.6 (plus de grands paquets)
 """
+
+"""Une bande de 10 MHz (360 kHz par RB à SCS = 30 kHz), alors 27 RB peuvent être exploitées :
+Espacement de 30 kHz donc 12 bandes × 30 kHz = 360 kHz
+1 slot (0.5 ms et 14 symboles) : un RB est un slot de 12 bandes
+En 5G, un RB (1 slot) transporte 14 symboles × 12 bandes = 168 symboles en 0.5 ms
+
+Nombre de bits par symbole :
+
+Si MCS ≤ 10 ⇒ Nbps = 2
+
+Si 11 ≤ MCS ≤ 20 ⇒ Nbps = 4
+
+Si 21 ≤ MCS ≤ 28 ⇒ Nbps = 6
+
+Un RB contient 168 symboles, donc pour Nbps = 2, on a :
+168 × 2 = 336 bits
+
+Pour classe 2 (classe prioritaire) :
+m2 = 200 octets = 1600 bits et p2 = 0.3
+1600 / 336 = 4.76 ⇒ 5 RBs
+
+Pour classe 1 :
+m1 = 500 octets = 4000 bits et p1 = 0.6
+4000 / 336 = 11.9 ⇒ 12 RBs
+
+Donc on fixe :
+m2 = 5 (en RBs) et p2 = 0.3 (plus de petits paquets)
+m1 = 12 (en RBs) et p1 = 0.6 (plus de grands paquets)
+
+Nombre total de slots dans une trame de 10 ms à SCS = 30 kHz : 20 slots
+Capacité totale C = 27 RBs × 20 slots = 540 RBs"""
+
+SCS = 60  # kHz
+slot_duration_ms = 1 / (SCS / 15)  # 15kHz → 1 ms, 30kHz → 0.5 ms, 60kHz → 0.25 ms
+
 def simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2):
     C1=int(C*pr1)
     C2=int(C*pr2)
@@ -190,73 +234,93 @@ def simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2):
         if etat_Y2<=C2:
             pop_2+=etat_Y2
             Y2,tps=get(etat_Y2,Y2,n)
-            dic_del_2[(y1,y2,n)]=tps
-            dic_att_2[(y1,y2,n)]=calcul_attente(y2)
-            dic_del_par_RB_2[(y1,y2,n)]=round(tps/y2,2)
+            #dic_del_2[(y1,y2,n)]=tps
+            dic_del_2[(y1,y2,n)] = tps * slot_duration_ms
+            dic_att_2[(y1,y2,n)]=calcul_attente(y2,C0)
+            #dic_del_par_RB_2[(y1,y2,n)]=round(tps/y2,2)
+            dic_del_par_RB_2[(y1,y2,n)] = round((tps * slot_duration_ms) / y2, 2)
             L_temps_2.append(tps)
             if etat_Y1<=C0+C1: 
                 pop_1+=etat_Y1
                 Y1,tps=get(etat_Y1,Y1,n)
-                L_temps_1.append(tps)
-                dic_del_1[(y1,y2,n)]=tps
-                dic_att_1[(y1,y2,n)]=calcul_attente(y1)
-                dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)
+                L_temps_1.append(tps* slot_duration_ms)
+                #dic_del_1[(y1,y2,n)]=tps
+                dic_del_1[(y1,y2,n)]=tps * slot_duration_ms
+                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0)
+                #dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)  
+                dic_del_par_RB_1[(y1,y2,n)] = round((tps * slot_duration_ms) / y1, 2)
             else:
                 pop_1+=C0+C1
                 Y1,tps=get(C0+C1,Y1,n)
-                L_temps_1.append(tps)
-                dic_del_1[(y1,y2,n)]=tps
-                dic_att_1[(y1,y2,n)]=calcul_attente(y1)
-                dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)
+                L_temps_1.append(tps * slot_duration_ms)
+                #dic_del_1[(y1,y2,n)]=tps
+                dic_del_1[(y1,y2,n)]=tps * slot_duration_ms
+                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0)
+                #dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)  
+                dic_del_par_RB_1[(y1,y2,n)] = round((tps * slot_duration_ms) / y1, 2)
         elif etat_Y2<=C2+C0: #système saturé
             pop_2+=etat_Y2
             Y2,tps=get(etat_Y2,Y2,n)
-            dic_del_2[(y1,y2,n)]=tps
-            dic_att_2[(y1,y2,n)]=calcul_attente(y2)
-            dic_del_par_RB_2[(y1,y2,n)]=round(tps/y2,2)
-            L_temps_2.append(tps)
+            #dic_del_2[(y1,y2,n)]=tps
+            dic_del_2[(y1,y2,n)] = tps * slot_duration_ms
+            dic_att_2[(y1,y2,n)]=calcul_attente(y2,C0)
+            #dic_del_par_RB_2[(y1,y2,n)]=round(tps/y2,2)
+            dic_del_par_RB_2[(y1,y2,n)] = round((tps * slot_duration_ms) / y2, 2)
+            L_temps_2.append(tps* slot_duration_ms)
             if etat_Y1<=C1:
                 pop_1+=etat_Y1
                 Y1,tps=get(etat_Y1,Y1,n)
-                L_temps_1.append(tps)
-                dic_del_1[(y1,y2,n)]=tps
-                dic_att_1[(y1,y2,n)]=calcul_attente(y1)
-                dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)
+                L_temps_1.append(tps* slot_duration_ms)
+                #dic_del_1[(y1,y2,n)]=tps
+                dic_del_1[(y1,y2,n)]=tps * slot_duration_ms
+                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0)
+                #dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)  
+                dic_del_par_RB_1[(y1,y2,n)] = round((tps * slot_duration_ms) / y1, 2)
             elif etat_Y1<= C-etat_Y2:
                 pop_1+=etat_Y1
                 Y1,tps=get(etat_Y1,Y1,n)
-                L_temps_1.append(tps)
-                dic_del_1[(y1,y2,n)]=tps
-                dic_att_1[(y1,y2,n)]=calcul_attente(y1)
-                dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)
+                L_temps_1.append(tps* slot_duration_ms)
+                #dic_del_1[(y1,y2,n)]=tps
+                dic_del_1[(y1,y2,n)]=tps * slot_duration_ms
+                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0)
+                #dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)  
+                dic_del_par_RB_1[(y1,y2,n)] = round((tps * slot_duration_ms) / y1, 2)
             else:
                 pop_1+=C-etat_Y2
                 Y1,tps=get(C-etat_Y2,Y1,n)
-                L_temps_1.append(tps)
-                dic_del_1[(y1,y2,n)]=tps
-                dic_att_1[(y1,y2,n)]=calcul_attente(y1)
-                dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)
+                L_temps_1.append(tps* slot_duration_ms)
+                #dic_del_1[(y1,y2,n)]=tps
+                dic_del_1[(y1,y2,n)]=tps * slot_duration_ms
+                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0)
+                #dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)  
+                dic_del_par_RB_1[(y1,y2,n)] = round((tps * slot_duration_ms) / y1, 2)
         elif etat_Y2>C2+C0 :
             pop_2+=C0+C2
             Y2,tps=get(C0+C2,Y2,n)
-            dic_del_2[(y1,y2,n)]=tps
-            dic_att_2[(y1,y2,n)]=calcul_attente(y2)
-            dic_del_par_RB_2[(y1,y2,n)]=round(tps/y2,2)
-            L_temps_2.append(tps)
+            #dic_del_2[(y1,y2,n)]=tps
+            dic_del_2[(y1,y2,n)] = tps * slot_duration_ms
+            dic_att_2[(y1,y2,n)]=calcul_attente(y2,C0)
+            #dic_del_par_RB_2[(y1,y2,n)]=round(tps/y2,2)
+            dic_del_par_RB_2[(y1,y2,n)] = round((tps * slot_duration_ms) / y2, 2)
+            L_temps_2.append(tps* slot_duration_ms)
             if etat_Y1<=C1:
                 pop_1+=etat_Y1
                 Y1,tps=get(etat_Y1,Y1,n)
-                L_temps_1.append(tps)
-                dic_del_1[(y1,y2,n)]=tps
-                dic_att_1[(y1,y2,n)]=calcul_attente(y1)
-                dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)
+                L_temps_1.append(tps* slot_duration_ms)
+                #dic_del_1[(y1,y2,n)]=tps
+                dic_del_1[(y1,y2,n)]=tps * slot_duration_ms
+                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0)
+                #dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)  
+                dic_del_par_RB_1[(y1,y2,n)] = round((tps * slot_duration_ms) / y1, 2)
             else:
                 pop_1+=C1
                 Y1,tps=get(C1,Y1,n)
-                L_temps_1.append(tps)
-                dic_del_1[(y1,y2,n)]=tps
-                dic_att_1[(y1,y2,n)]=calcul_attente(y1)
-                dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)
+                L_temps_1.append(tps* slot_duration_ms)
+                #dic_del_1[(y1,y2,n)]=tps
+                dic_del_1[(y1,y2,n)]=tps * slot_duration_ms
+                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0)
+                #dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)  
+                dic_del_par_RB_1[(y1,y2,n)] = round((tps * slot_duration_ms) / y1, 2)
         Y1=Y1+Arrivees1
         y1=len(Y1)
         #print(Y1)
@@ -275,6 +339,15 @@ def liste_temps(T,A1):
         for j in range(int(A1[i])):
             L.append(T[i])
     return L
+
+
+def calcul_C(bande_MHz, scs_kHz):
+    RB_width_kHz = 12 * scs_kHz
+    RBs_per_slot = int((bande_MHz * 1000) // RB_width_kHz)
+    slot_duration_ms = 1 / (scs_kHz / 15)  # en ms
+    slots_per_frame = int(10 / slot_duration_ms)
+    C = RBs_per_slot * slots_per_frame
+    return C
 def courbe_temps_attente_dom(N,nbre_pts=30,pas=0.01,alpha=0.5):
     '''1=m1*p1*lamda_1+m2*p2*lamda_2/C,alpha=m1*p1*lam_1+m2*p2*lam_2/C'''
     list_stab=[]
@@ -289,13 +362,18 @@ def courbe_temps_attente_dom(N,nbre_pts=30,pas=0.01,alpha=0.5):
     list_esperance_Cl2_anal=[]
     #list_A1=[]
     #list_A2=[]
-    T=0.001
-    m1=48
+    #T=0.001
+    T=0.01
+    #m1=48
+    m1=12
+    #m2=5
     m2=20
     p1=0.6
     p2=0.4
-    C=500
-    pr1=0.05 #Mariem : 10% de ressources garanties pour la classe 1
+    #C=500 
+    #C=540 #scs 30khz
+    C=calcul_C(10, SCS)  # 10 MHz bande, SCS = 30 kHz
+    pr1=0.1 #Mariem : 10% de ressources garanties pour la classe 1
     pr2=0
     C1=int(C*pr1)
     C2=int(C*pr2)
