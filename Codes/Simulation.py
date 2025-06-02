@@ -6,9 +6,12 @@ import random
 import simpy
 import sys
 import math
+import os
+from datetime import datetime
 from collections import Counter
 from scipy.stats import expon
 from scipy.stats import poisson
+
 """ code avec ajout de la fonction bino"""
 def bino(m1,p1):
  A=np.random.binomial(m1, p1, 1)
@@ -63,7 +66,7 @@ def function_cl2(dic):
     for j in range(len(C1)):
         pos1 = np.where(np.array(C) == C1[j])[0]
         F.append(pos1)
-    print(F)
+    #print(F)
     for j in range(len(C1)):
         for k in list(F[j]):
           E.append(D[k])
@@ -76,7 +79,7 @@ def function_cl2(dic):
     A=0
     if 450-y<0:
        #A=y-450
-       A=(y-450) * slot_duration_ms
+       A=(y-450)
     return A"""
 
 def calcul_attente(y,C0):
@@ -93,8 +96,10 @@ def cal_esperance(index,proba):
         X_etoile=random.choices(index,proba)
         moy=np.array(X_etoile)+moy
     return (moy/B)[0]
+
 def put(item,nbr,Y):
     return Y+[item]*nbr #rajoute nbr fois l'élèment item
+
 def get(nbr,Y,temps):
     #print(Y[0:nbr])
     #print(temps)
@@ -122,9 +127,7 @@ En 5G, un RB (1 slot) transporte 14 symboles × 12 bandes = 168 symboles en 0.5 
 Nombre de bits par symbole :
 
 Si MCS ≤ 10 ⇒ Nbps = 2
-
-Si 11 ≤ MCS ≤ 20 ⇒ Nbps = 4
-
+Si 11 ≤ MCS ≤ 20 ⇒ Nbps = 4µ
 Si 21 ≤ MCS ≤ 28 ⇒ Nbps = 6
 
 Un RB contient 168 symboles, donc pour Nbps = 2, on a :
@@ -145,7 +148,7 @@ m1 = 12 (en RBs) et p1 = 0.6 (plus de grands paquets)
 Nombre total de slots dans une trame de 10 ms à SCS = 30 kHz : 20 slots
 Capacité totale C = 27 RBs × 20 slots = 540 RBs"""
 
-SCS = 60  # kHz
+SCS = 15  # kHz
 slot_duration_ms = 1 / (SCS / 15)  # 15kHz → 1 ms, 30kHz → 0.5 ms, 60kHz → 0.25 ms
 
 def simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2):
@@ -341,14 +344,38 @@ def liste_temps(T,A1):
     return L
 
 
-def calcul_C(bande_MHz, scs_kHz):
+"""def calcul_C(bande_MHz, scs_kHz):
     RB_width_kHz = 12 * scs_kHz
     RBs_per_slot = int((bande_MHz * 1000) // RB_width_kHz)
-    slot_duration_ms = 1 / (scs_kHz / 15)  # en ms
     slots_per_frame = int(10 / slot_duration_ms)
     C = RBs_per_slot * slots_per_frame
+    return C"""
+
+def calcul_C(scs_kHz):
+    """
+    Calcule C en utilisant les RBs standardisés pour 10 MHz.
+    """
+    if scs_kHz == 15:
+        RBs_per_slot = 52
+    elif scs_kHz == 30:
+        RBs_per_slot = 24
+    elif scs_kHz == 60:
+        RBs_per_slot = 11
+    else:
+        raise ValueError("SCS non supporté. Utilisez 15, 30 ou 60 kHz.")
+
+    slot_duration = 15 / scs_kHz  # en ms
+    slots_per_trame = int(10 / slot_duration)
+    C = RBs_per_slot * slots_per_trame
     return C
-def courbe_temps_attente_dom(N,nbre_pts=30,pas=0.01,alpha=0.5):
+
+def create_output_directory(N, scs_kHz):
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    dir_name = f"N_{N}_SCS_{scs_kHz}_{timestamp}"
+    os.makedirs(dir_name, exist_ok=True)
+    return dir_name
+
+def courbe_temps_attente_dom(N,scs_kHz,nbre_pts=30,pas=0.01,alpha=0.5):
     '''1=m1*p1*lamda_1+m2*p2*lamda_2/C,alpha=m1*p1*lam_1+m2*p2*lam_2/C'''
     list_stab=[]
     list_tmps_att1_pois=[]
@@ -372,12 +399,14 @@ def courbe_temps_attente_dom(N,nbre_pts=30,pas=0.01,alpha=0.5):
     p2=0.4
     #C=500 
     #C=540 #scs 30khz
-    C=calcul_C(10, SCS)  # 10 MHz bande, SCS = 30 kHz
+    C=calcul_C(scs_kHz)  # 10 MHz bande
     pr1=0.1 #Mariem : 10% de ressources garanties pour la classe 1
     pr2=0
     C1=int(C*pr1)
     C2=int(C*pr2)
     C0=C-C1-C2
+    output_dir = create_output_directory(N, scs_kHz)
+
     for prec in range(1,nbre_pts):
         d=pas
         lam_1=(1-(0.05+d))*alpha*C/(p1*m1)
@@ -426,7 +455,7 @@ def courbe_temps_attente_dom(N,nbre_pts=30,pas=0.01,alpha=0.5):
           # 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
           # 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
         dcfreq = pd.DataFrame(data=cfreq)  
-        with pd.ExcelWriter('dict_compose_poisson_freq%d.xlsx'% (prec), engine="openpyxl",mode='w+') as writer:
+        with pd.ExcelWriter(os.path.join(output_dir, 'dict_compose_poisson_freq%d.xlsx'% (prec)), engine="openpyxl",mode='w+') as writer:
            dcfreq.to_excel(writer)  
         cprob={'lamda_1':lam_1,
            'lamda_2':lam_2,
@@ -436,7 +465,7 @@ def courbe_temps_attente_dom(N,nbre_pts=30,pas=0.01,alpha=0.5):
           # 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
           # 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
         dcprob = pd.DataFrame(data=cprob)  
-        with pd.ExcelWriter('dict_compose_poisson_Cl2_proba%d.xlsx'% (prec), engine="openpyxl",mode='w+') as writer:
+        with pd.ExcelWriter(os.path.join(output_dir, 'dict_compose_poisson_Cl2_proba%d.xlsx'% (prec)), engine="openpyxl",mode='w+') as writer:
            dcprob.to_excel(writer)
         cprob1={'lamda_1':lam_1,
            'lamda_2':lam_2,
@@ -446,7 +475,7 @@ def courbe_temps_attente_dom(N,nbre_pts=30,pas=0.01,alpha=0.5):
           # 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
           # 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
         dcprob1 = pd.DataFrame(data=cprob1)  
-        with pd.ExcelWriter('dict_compose_poisson_Cl1_proba%d.xlsx'% (prec), engine="openpyxl",mode='w+') as writer:
+        with pd.ExcelWriter(os.path.join(output_dir, 'dict_compose_poisson_Cl1_proba%d.xlsx'% (prec)), engine="openpyxl",mode='w+') as writer:
            dcprob1.to_excel(writer)
         cdel={'lamda_1':lam_1,
               'lamda_2':lam_2,
@@ -459,7 +488,7 @@ def courbe_temps_attente_dom(N,nbre_pts=30,pas=0.01,alpha=0.5):
           # 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
           # 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
         dcdel = pd.DataFrame(data=cdel)  
-        with pd.ExcelWriter('dict_compose_poisson_Cl2_del%d.xlsx'% (prec), engine="openpyxl",mode='w+') as writer:
+        with pd.ExcelWriter(os.path.join(output_dir, 'dict_compose_poisson_Cl2_del%d.xlsx'% (prec)), engine="openpyxl",mode='w+') as writer:
            dcdel.to_excel(writer)
         cdelf={'lamda_1':lam_1,
               'lamda_2':lam_2,
@@ -470,7 +499,7 @@ def courbe_temps_attente_dom(N,nbre_pts=30,pas=0.01,alpha=0.5):
           # 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
           # 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
         dcdelf = pd.DataFrame(data=cdelf)  
-        with pd.ExcelWriter('dict_compose_poisson_Cl2_del_freq%d.xlsx'% (prec), engine="openpyxl",mode='w+') as writer:
+        with pd.ExcelWriter(os.path.join(output_dir, 'dict_compose_poisson_Cl2_del_freq%d.xlsx'% (prec)), engine="openpyxl",mode='w+') as writer:
            dcdelf.to_excel(writer)    
         cdelclass1={'lamda_1':lam_1,
               'lamda_2':lam_2,
@@ -483,7 +512,7 @@ def courbe_temps_attente_dom(N,nbre_pts=30,pas=0.01,alpha=0.5):
           # 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
           # 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
         dcdelcl1 = pd.DataFrame(data=cdelclass1)  
-        with pd.ExcelWriter('dict_compose_poisson_Cl1_del%d.xlsx'% (prec), engine="openpyxl",mode='w+') as writer:
+        with pd.ExcelWriter(os.path.join(output_dir, 'dict_compose_poisson_Cl1_del%d.xlsx'% (prec)), engine="openpyxl",mode='w+') as writer:
            dcdelcl1.to_excel(writer)
         cdelfclass1={'lamda_1':lam_1,
               'lamda_2':lam_2,
@@ -494,7 +523,7 @@ def courbe_temps_attente_dom(N,nbre_pts=30,pas=0.01,alpha=0.5):
           # 'dic_frequency_poisson_1_keys': dic_out_poisson_1.keys(),
           # 'dic_frequency_poisson_1_values': dic_out_poisson_1.values(),
         dcdelf = pd.DataFrame(data=cdelfclass1)  
-        with pd.ExcelWriter('dict_compose_poisson_Cl1_del_freq%d.xlsx'% (prec), engine="openpyxl",mode='w+') as writer:
+        with pd.ExcelWriter(os.path.join(output_dir, 'dict_compose_poisson_Cl1_del_freq%d.xlsx'% (prec)), engine="openpyxl",mode='w+') as writer:
            dcdelf.to_excel(writer)                         
     d = {'rapport_stabilité': list_stab, 
          'tmps-att1-pois': list_tmps_att1_pois, 
@@ -517,8 +546,21 @@ def courbe_temps_attente_dom(N,nbre_pts=30,pas=0.01,alpha=0.5):
     #c={dic_frequency}
     df = pd.DataFrame(data=d)  
     #dc = pd.DataFrame(data=c)  
-    with pd.ExcelWriter('sim_res_new_compose.xlsx', engine="openpyxl",mode='w+') as writer:
+    with pd.ExcelWriter(os.path.join(output_dir, 'sim_res_new_compose.xlsx'), engine="openpyxl",mode='w+') as writer:
         df.to_excel(writer)
-    #with pd.ExcelWriter('dict.xlsx', engine="openpyxl",mode='A') as writer:
+    #with pd.ExcelWriter(os.path.join(output_dir, 'dict.xlsx', engine="openpyxl",mode='A') as writer:
     #    dc.to_excel(writer)
+    print("\n")  # This prints a newline character
+    print("Simulation terminée")
+    print("Nombre de clients dans le système pour la classe 1:", pop_1)
+    print("Nombre de clients dans le système pour la classe 2:", pop_2)
+    print("Temps moyen d'attente pour la classe 1:", np.mean(L_temps_1))
+    print("Temps moyen d'attente pour la classe 2:", np.mean(L_temps_2))
+    print("Capacité totale C:", C)
+    print("C1:", C1)
+    print("C2:", C2)
+    print("C0:", C0)
+    print("time slot duration (ms):", slot_duration_ms)
+    print("SCS (kHz):", scs_kHz)
+
     return df
