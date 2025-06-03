@@ -82,7 +82,7 @@ def function_cl2(dic):
        A=(y-450)
     return A"""
 
-def calcul_attente(y,C0):
+def calcul_attente(y,C0, slot_duration_ms):
     A=0
     if C0-y<0:
        #A=y-450
@@ -148,10 +148,9 @@ m1 = 12 (en RBs) et p1 = 0.6 (plus de grands paquets)
 Nombre total de slots dans une trame de 10 ms à SCS = 30 kHz : 20 slots
 Capacité totale C = 27 RBs × 20 slots = 540 RBs"""
 
-SCS = 15  # kHz
-slot_duration_ms = 1 / (SCS / 15)  # 15kHz → 1 ms, 30kHz → 0.5 ms, 60kHz → 0.25 ms
+#SCS = 15  # kHz
 
-def simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2):
+def simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2,slot_duration_ms=0.5):
     C1=int(C*pr1)
     C2=int(C*pr2)
     C0=C-C1-C2
@@ -239,7 +238,7 @@ def simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2):
             Y2,tps=get(etat_Y2,Y2,n)
             #dic_del_2[(y1,y2,n)]=tps
             dic_del_2[(y1,y2,n)] = tps * slot_duration_ms
-            dic_att_2[(y1,y2,n)]=calcul_attente(y2,C0)
+            dic_att_2[(y1,y2,n)]=calcul_attente(y2,C0, slot_duration_ms)
             #dic_del_par_RB_2[(y1,y2,n)]=round(tps/y2,2)
             dic_del_par_RB_2[(y1,y2,n)] = round((tps * slot_duration_ms) / y2, 2)
             L_temps_2.append(tps)
@@ -249,7 +248,7 @@ def simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2):
                 L_temps_1.append(tps* slot_duration_ms)
                 #dic_del_1[(y1,y2,n)]=tps
                 dic_del_1[(y1,y2,n)]=tps * slot_duration_ms
-                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0)
+                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0, slot_duration_ms)
                 #dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)  
                 dic_del_par_RB_1[(y1,y2,n)] = round((tps * slot_duration_ms) / y1, 2)
             else:
@@ -266,7 +265,7 @@ def simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2):
             Y2,tps=get(etat_Y2,Y2,n)
             #dic_del_2[(y1,y2,n)]=tps
             dic_del_2[(y1,y2,n)] = tps * slot_duration_ms
-            dic_att_2[(y1,y2,n)]=calcul_attente(y2,C0)
+            dic_att_2[(y1,y2,n)]=calcul_attente(y2,C0, slot_duration_ms)
             #dic_del_par_RB_2[(y1,y2,n)]=round(tps/y2,2)
             dic_del_par_RB_2[(y1,y2,n)] = round((tps * slot_duration_ms) / y2, 2)
             L_temps_2.append(tps* slot_duration_ms)
@@ -276,7 +275,7 @@ def simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2):
                 L_temps_1.append(tps* slot_duration_ms)
                 #dic_del_1[(y1,y2,n)]=tps
                 dic_del_1[(y1,y2,n)]=tps * slot_duration_ms
-                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0)
+                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0, slot_duration_ms)
                 #dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)  
                 dic_del_par_RB_1[(y1,y2,n)] = round((tps * slot_duration_ms) / y1, 2)
             elif etat_Y1<= C-etat_Y2:
@@ -285,7 +284,7 @@ def simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2):
                 L_temps_1.append(tps* slot_duration_ms)
                 #dic_del_1[(y1,y2,n)]=tps
                 dic_del_1[(y1,y2,n)]=tps * slot_duration_ms
-                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0)
+                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0, slot_duration_ms)
                 #dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)  
                 dic_del_par_RB_1[(y1,y2,n)] = round((tps * slot_duration_ms) / y1, 2)
             else:
@@ -294,7 +293,7 @@ def simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2):
                 L_temps_1.append(tps* slot_duration_ms)
                 #dic_del_1[(y1,y2,n)]=tps
                 dic_del_1[(y1,y2,n)]=tps * slot_duration_ms
-                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0)
+                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0, slot_duration_ms)
                 #dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)  
                 dic_del_par_RB_1[(y1,y2,n)] = round((tps * slot_duration_ms) / y1, 2)
         elif etat_Y2>C2+C0 :
@@ -302,7 +301,7 @@ def simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2):
             Y2,tps=get(C0+C2,Y2,n)
             #dic_del_2[(y1,y2,n)]=tps
             dic_del_2[(y1,y2,n)] = tps * slot_duration_ms
-            dic_att_2[(y1,y2,n)]=calcul_attente(y2,C0)
+            dic_att_2[(y1,y2,n)]=calcul_attente(y2,C0, slot_duration_ms)
             #dic_del_par_RB_2[(y1,y2,n)]=round(tps/y2,2)
             dic_del_par_RB_2[(y1,y2,n)] = round((tps * slot_duration_ms) / y2, 2)
             L_temps_2.append(tps* slot_duration_ms)
@@ -312,7 +311,7 @@ def simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2):
                 L_temps_1.append(tps* slot_duration_ms)
                 #dic_del_1[(y1,y2,n)]=tps
                 dic_del_1[(y1,y2,n)]=tps * slot_duration_ms
-                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0)
+                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0, slot_duration_ms)
                 #dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)  
                 dic_del_par_RB_1[(y1,y2,n)] = round((tps * slot_duration_ms) / y1, 2)
             else:
@@ -321,7 +320,7 @@ def simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2):
                 L_temps_1.append(tps* slot_duration_ms)
                 #dic_del_1[(y1,y2,n)]=tps
                 dic_del_1[(y1,y2,n)]=tps * slot_duration_ms
-                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0)
+                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0, slot_duration_ms)
                 #dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)  
                 dic_del_par_RB_1[(y1,y2,n)] = round((tps * slot_duration_ms) / y1, 2)
         Y1=Y1+Arrivees1
@@ -399,6 +398,7 @@ def courbe_temps_attente_dom(N,scs_kHz,nbre_pts=30,pas=0.01,alpha=0.5):
     p2=0.4
     #C=500 
     #C=540 #scs 30khz
+    slot_duration_ms = 1 / (scs_kHz / 15)  # 15kHz → 1 ms, 30kHz → 0.5 ms, 60kHz → 0.25 ms
     C=calcul_C(scs_kHz)  # 10 MHz bande
     pr1=0.1 #Mariem : 10% de ressources garanties pour la classe 1
     pr2=0
@@ -418,7 +418,7 @@ def courbe_temps_attente_dom(N,scs_kHz,nbre_pts=30,pas=0.01,alpha=0.5):
         ##poisson
         #print(dic_frequency)
         #Mariem :index, proba pour calculer Y_init
-        L_temps_1, L_temps_2, pop_1, pop_2, dic, dic_frequency2,dic_del_2,dic_att_2,dic_del_par_RB_2,dic_del_1,dic_att_1,dic_del_par_RB_1=simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2)
+        L_temps_1, L_temps_2, pop_1, pop_2, dic, dic_frequency2,dic_del_2,dic_att_2,dic_del_par_RB_2,dic_del_1,dic_att_1,dic_del_par_RB_1=simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2,slot_duration_ms)
         #Mariem : ind,prob pour calculer l'éspérance
         #for m in dic_del_2.keys():
         for d in dic_del_2.keys():
@@ -562,5 +562,4 @@ def courbe_temps_attente_dom(N,scs_kHz,nbre_pts=30,pas=0.01,alpha=0.5):
     print("C0:", C0)
     print("time slot duration (ms):", slot_duration_ms)
     print("SCS (kHz):", scs_kHz)
-
     return df
