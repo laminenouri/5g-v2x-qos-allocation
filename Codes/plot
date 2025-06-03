@@ -1,0 +1,41 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+import re
+
+# 🔁 Nom du dossier généré automatiquement par la simulation
+nom_du_dossier = "N_2000_SCS_30_20250602_001744"  # à adapter
+
+# ✅ Extraction automatique de N et SCS depuis le nom du dossier
+match = re.match(r"N_(\d+)_SCS_(\d+)_", nom_du_dossier)
+if match:
+    N = int(match.group(1))
+    scs_kHz = int(match.group(2))
+else:
+    raise ValueError("Nom du dossier invalide : impossible d'extraire N et SCS.")
+
+# 📄 Chargement du fichier Excel
+fichier = os.path.join(nom_du_dossier, "dict_compose_poisson_Cl2_del_freq1.xlsx")
+df = pd.read_excel(fichier)
+data = dict(zip(df["delai_classe_2_poisson"], df["freq_delai_classe2_poisson"]))
+
+# 📈 Construction de la courbe avec interpolation discrète
+x_range = np.arange(0, 2.51, 0.01)
+y_values = [data.get(round(x, 4), 0) for x in x_range]
+
+# 🎨 Tracé
+plt.figure(figsize=(10, 5))
+plt.plot(x_range, y_values, label='Distribution interpolée', color='blue')
+plt.axvspan(0, 1, color='green', alpha=0.2, label='Optimal (<1 ms)')
+plt.axvspan(1, 1.5, color='orange', alpha=0.2, label='Acceptable (1–1.5 ms)')
+plt.axvspan(1.5, 2, color='red', alpha=0.2, label='Critique (1.5–2 ms)')
+plt.axvspan(2, 2.5, color='gray', alpha=0.2, label='Non-URLLC (>2 ms)')
+
+plt.title(f"URLLC Delay zones vs delay distribution for class 2 (N={N}, SCS={scs_kHz} kHz)")
+plt.xlabel("Délai (ms)")
+plt.ylabel("Probabilité")
+plt.legend(loc='upper right')
+plt.grid(True, linestyle='--', alpha=0.5)
+plt.tight_layout()
+plt.show()
