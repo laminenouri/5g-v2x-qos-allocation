@@ -150,7 +150,7 @@ Capacité totale C = 27 RBs × 20 slots = 540 RBs"""
 
 #SCS = 15  # kHz
 
-def simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2,slot_duration_ms=0.5):
+def simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2,slot_duration_ms):
     C1=int(C*pr1)
     C2=int(C*pr2)
     C0=C-C1-C2
