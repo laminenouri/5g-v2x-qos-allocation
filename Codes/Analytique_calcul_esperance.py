@@ -115,6 +115,6 @@ def calculEY(T,C,lamda,m2,p2,B):
     A1=calculEA(m2, p2)
     B1=calculdEA(lamda, T, m2, p2)
     #C1=calculallPi(T, C, m2, p2, B)
-    P1=((A1*C2-B1)/(A1-1)**2)*calculallPi(lamda,T, C, m2, p2, B)
-    P2=(A1/(A1-1))*calculallPi2(lamda,T, C, m2, p2, B)
-    return P1+P2
+    P1 = ((A1 * C2 - B1) / (A1 - 1) ** 2) * calculallPi(lamda, T, C, m2, p2, B)
+    P2 = (A1 / (A1 - 1)) * calculallPi2(lamda, T, C, m2, p2, B)
+    return P1 + P2

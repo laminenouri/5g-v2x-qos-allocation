@@ -257,7 +257,7 @@ def simulate_temps_poisson(N,lam_1,lam_2,m1,m2,p1,p2,C,pr1,pr2,slot_duration_ms)
                 L_temps_1.append(tps * slot_duration_ms)
                 #dic_del_1[(y1,y2,n)]=tps
                 dic_del_1[(y1,y2,n)]=tps * slot_duration_ms
-                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0)
+                dic_att_1[(y1,y2,n)]=calcul_attente(y1,C0, slot_duration_ms)
                 #dic_del_par_RB_1[(y1,y2,n)]=round(tps/y1,2)  
                 dic_del_par_RB_1[(y1,y2,n)] = round((tps * slot_duration_ms) / y1, 2)
         elif etat_Y2<=C2+C0: #système saturé
@@ -357,7 +357,7 @@ def calcul_C(scs_kHz):
     if scs_kHz == 15:
         RBs_per_slot = 52
     elif scs_kHz == 30:
-        RBs_per_slot = 24
+        RBs_per_slot = 27
     elif scs_kHz == 60:
         RBs_per_slot = 11
     else:
